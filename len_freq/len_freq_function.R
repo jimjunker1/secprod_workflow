@@ -1,0 +1,101 @@
+## LEN_FREQ, plotting length frequency histograms of invert data, Author: Jim Junker
+## Last Updated: Sept. 2016
+##
+##Purpose: This code automates the plotting of length-frequency histograms of specified site, habitat, and taxon for a specified date range.
+##	This function is meant to be used with a matrix of invertebrate size-classes(mm) and abundance (m^-2). There are five preceeding columns
+##	SITE, SAMPLE, DATE, HABITAT, TAXON.
+
+##	Date should maintain the following form with exact headings on columns 1-5
+
+###	SITE	SAMPLE	DATE		HABITAT	TAXON		0.25	0.5	1	1.5
+#	HVER	2		08/02/2011	COBBLE	OSTRACOD	0	0	2	2
+#	HVER	2		08/02/2011	COBBLE	MIDGE		0	0	10	7
+#	HVER	2		08/02/2011	COBBLE	OSTRACOD	0	0	6	10
+#	HVER	2		08/02/2011	COBBLE	TUBIFICID	0	10	5	0
+#	HVER	4		08/02/2011	COBBLE	LIMNOPHORA	0	0	0	0
+#	.
+#	.
+#	.
+
+## Notes:
+##	SITE can handle an unlimited number of sites
+##	SAMPLE number is detected and can handle unequal sample numbers across site/date/habitat/etc.
+##	DATE This is the date of sampling. This must be in the form of MM/DD/YYY (sample date: "1/5/2008", "9/15/2007", etc.). This maintains the format for further
+##		secondary production estimation.
+##	HABITAT For habitat specific production. This is necessary for further secondary production estimation. Can have unlimited number of habitat types
+##	TAXON This is the taxon information used for each group to summarize. This code will summarize the taxon with exactly matching names within samples.
+##	Column 6 - n (as many as needed) These headings denote mm size classes. The values in these columns are abundances sample (m^2).
+##		There is no requirement for these to be in order or in constant intervals. All columns should be filled in with counts or zeros. Truly missing data
+##		should be filled with "NA". There is no need to include all non-occurrences of taxa, but will work fine if it does. 
+##
+##	When loading in the data file be sure to turn name checking off otherwise  
+##	(i.e. DATA <- read.table(C:\DATA.txt, header = T, sep = "\t", quote = "", strip.white = T, row.names = F, check.names = F))
+## 
+
+##Required packages 'plyr', 'dplyr', 'tidyr', 'reshape2', 'ggplot2', 'chron', 'grid', 'gridExtra'
+if(!require("pacman")) install.packages("pacman")
+library(pacman)
+package.list <- c("plyr", "dplyr", "tidyr", "reshape2", "ggplot2", "chron", "grid", "gridExtra")
+p_load(char = package.list, install = T)
+
+
+####
+
+len_freq <- function(DATA, site, TAXA, habitat, first.date, last.date, fun, ...){
+theme_set(theme_classic())
+
+#Extract years, months, and days, and re-code them as numeric variables:
+  year <- as.numeric(as.character(years(chron(dates = as.character(DATA$DATE)))))
+  month <- as.numeric(months(chron(dates = as.character(DATA$DATE))))
+  day <- as.numeric(days(chron(dates = as.character(DATA$DATE))))
+
+  #Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
+  JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
+
+  #Insert the julian date variable into the dataframe:
+  DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])])
+
+#source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
+if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
+	
+	#DATA_SUM  <- ddply(DATA, c("SITE", "DATE", "HABITAT", "TAXON"), function(x) apply(x[,7:(dim(DATA)[2])], fun, na.rm = T))
+	#DATA_SUM  <- ddply(DATA, c("SITE", "DATE", "HABITAT", "TAXON"), colwise(mean, DATA[,7:(dim(DATA)[2])]))
+	DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
+	DATA_COL <- DATA_SUM[,1:5]
+	DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
+	PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
+
+sites = levels(DATA$SITE)
+hab = levels(DATA$HABITAT)
+
+   for(i in sites){
+   for(j in hab){
+
+taxon = levels(DATA$TAXON)
+
+   for(k in taxon){
+	data1 = PROP_TABLE[which(PROP_TABLE$SITE == i) & which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
+	dates = as.character(sort(unique(data1$JULIAN)))
+	pltList = list()
+
+   for(l in dates){
+	data2 = data1[which(data1$JULIAN == l),];
+	date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+	v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+	ymax = max(date_data$rel.freq) + 0.05
+	xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+
+	pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
+	geom_bar(stat = "identity", width = 0.99) +
+	scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
+	scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+	labs(x = "Size (mm)", y = "Relative Frequency") +
+	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+	
+  args.list(list(grobs = pltList, top = paste(date_data$TAXON))
+  do.call(grid.arrange, args.list)
+}
+	
+
+	
+
