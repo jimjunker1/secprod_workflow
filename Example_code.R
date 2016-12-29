@@ -113,7 +113,7 @@ print(paste("Run time=", round(total.time[[1]],digits = 2)))
 }  #this works, need to remove x lab and y labs and fit it better into page.
 
 
-##running in parallel to see if it speeds it up. Need package "foreach"
+##running in parallel to see if it speeds it up. Need package "foreach", "doParallel", "iterators"
 foreach(i in dates) %do% {
   stm <- proc.time()
   data = hv_prop_table[which(hv_prop_table$JULIAN == i),];
