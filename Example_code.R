@@ -27,6 +27,10 @@ bugs_merge <- read.table(file = './Sample_merged.txt', header= T, sep = "\t", qu
 
 bugs_sum <- aggregate(bugs_merge[c(names(bugs_merge[6:(dim(bugs_merge)[2])]))], by = bugs_merge[c("SITE","DATE","HABITAT","TAXON")], FUN = median)
 
+
+#This code needs to be integrated into the FRAC_MERGE script.
+#Or more importantly should be made into its own function to adjust dates to Julian
+#across all data.frames used to production analysis
 year <- as.numeric(as.character(years(chron(dates = as.character(bugs_sum$DATE)))))
 month <- as.numeric(months(chron(dates = as.character(bugs_sum$DATE))))
 day <- as.numeric(days(chron(dates = as.character(bugs_sum$DATE))))
@@ -37,7 +41,7 @@ bugs_sum = data.frame(bugs_sum[,1:2], JULIAN, bugs_sum[,3:dim(bugs_sum)[2]], che
 
 
 #dates = sort(unique(bugs_sum$JULIAN))
-
+######
 
 
 #Sample code to create the length frequency plot for a single taxon
@@ -65,7 +69,7 @@ hv_prop_table = data.frame(hv_midge_col, hv_midge_prop2, check.names = F) #makes
 
 head(hv_prop_table)
 
-#now writing a loop function to plot each date len_freq hist
+#now writing a loop function to plot each date len_freq hist. this does not work for all dates.
 loop = function(x,...){
 for( i in x$DATE){
 
@@ -77,13 +81,15 @@ hist <- ggplot(date_data, aes(x = as.numeric(size), y = rel.freq)) +
 dev.new() 
 }
 }
-
-
+###
+#####Another try to plot all dates on single plot. Need to save file with 
+#species names rather than making it 
 dates = as.character(sort(unique(hv_prop_table$JULIAN)))
 
 pltList = list()
-for(i in dates){
-	data = hv_prop_table[which(hv_prop_table$JULIAN == i),];
+for(i in dates) {
+  stm <- proc.time()
+  data = hv_prop_table[which(hv_prop_table$JULIAN == i),];
 	date_data = gather(data, size, rel.freq, 6:(dim(data)[2]));
 	v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
 	ymax = max(date_data$rel.freq) + 0.05
@@ -102,5 +108,62 @@ args.list = list(grobs = pltList, top = paste(date_data$TAXON))
 do.call(grid.arrange, args.list)
 #print(multiplot(plotlist = pltList, ncol = 3))
 print(i)
+total.time <- proc.time() - stm
+print(paste("Run time=", round(total.time[[1]],digits = 2)))
 }  #this works, need to remove x lab and y labs and fit it better into page.
 
+
+##running in parallel to see if it speeds it up. Need package "foreach"
+foreach(i in dates) %do% {
+  stm <- proc.time()
+  data = hv_prop_table[which(hv_prop_table$JULIAN == i),];
+  date_data = gather(data, size, rel.freq, 6:(dim(data)[2]));
+  v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+  ymax = max(date_data$rel.freq) + 0.05
+  xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+  
+  pltList[[i]] <- ggplot(date_data, aes(x = as.numeric(size), y = rel.freq)) +
+    geom_bar(stat = "identity", width = .99) +
+    geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
+    scale_y_continuous(limits = c(0,as.numeric(ymax)), expand = c(0,0)) +
+    scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+    labs(x = "Size (mm)", y = "Relative Frequency") +
+    ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == i)])))
+  #do.call(plot_grid,pltList)
+  args.list = list(grobs = pltList, top = paste(date_data$TAXON))
+  #do.call(grid.arrange, pltList)
+  do.call(grid.arrange, args.list)
+  #print(multiplot(plotlist = pltList, ncol = 3))
+  print(i)
+  total.time <- proc.time() - stm
+  print(paste("Run time=", total.time[[1]]))
+} 
+
+
+#tryin something out here. Making the plotting a function so can run parallel or 
+#just put in the len_freq function in multiple places
+plot_loop = function(DATA,...) {
+  stm <- proc.time()
+  data = DATA[which(DATA$JULIAN == i),];
+  date_data = gather(data, size, rel.freq, 6:(dim(data)[2]));
+  v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+  ymax = max(date_data$rel.freq) + 0.05
+  xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+  
+  pltList[[i]] <- ggplot(date_data, aes(x = as.numeric(size), y = rel.freq)) +
+    geom_bar(stat = "identity", width = .99) +
+    geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
+    scale_y_continuous(limits = c(0,as.numeric(ymax)), expand = c(0,0)) +
+    scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+    labs(x = "Size (mm)", y = "Relative Frequency") +
+    ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == i)])))
+  #do.call(plot_grid,pltList)
+  args.list = list(grobs = pltList, top = paste(date_data$TAXON))
+  #do.call(grid.arrange, pltList)
+  do.call(grid.arrange, args.list)
+  #print(multiplot(plotlist = pltList, ncol = 3))
+  print(i)
+  total.time <- proc.time() - stm
+  print(paste("Run time=", round(total.time[[1]],digits = 2)))
+} 
+foreach(i in dates) %do% plot_loop(i)

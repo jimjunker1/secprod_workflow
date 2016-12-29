@@ -94,8 +94,10 @@ taxon = levels(DATA$TAXON)
 	
   args.list(list(grobs = pltList, top = paste(date_data$TAXON))
   do.call(grid.arrange, args.list)
-}
-	
+   }
+   }
+   }
+     }
 
 	
 
