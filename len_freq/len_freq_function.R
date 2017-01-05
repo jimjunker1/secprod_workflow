@@ -94,6 +94,7 @@ taxon = levels(DATA$TAXON)
 	
   args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
   do.call(grid.arrange, args.list)
+
    }
    }
    }
@@ -158,4 +159,4 @@ else if(!missing(site) & !missing(TAXA) & missing(habitat) & missing(first.date)
         do.call(grid.arrange, args.list)
     }
   }
-} 
+}
