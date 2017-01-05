@@ -34,11 +34,10 @@
 ##	When loading in the data file be sure to turn name checking off otherwise  
 ##	(i.e. DATA <- read.table(C:\DATA.txt, header = T, sep = "\t", quote = "", strip.white = T, check.names = F))
 ## 
-##
 ##Required packages 'plyr', 'dplyr', 'tidyr', 'reshape2', 'chron'
 if(!require("pacman")) install.packages("pacman")
 library(pacman)
-package.list <- c("plyr", "dplyr", "tidyr", "reshape2", "chron")
+package.list <- c( "plyr", "dplyr", "tidyr", "reshape2", "chron")
 p_load(char = package.list, install = T)
 ##
 frac_merge <- function(DATA, file.name,...) {

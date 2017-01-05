@@ -89,39 +89,74 @@ taxon = levels(DATA$TAXON)
 	geom_bar(stat = "identity", width = 0.99) +
 	scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
 	scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
-	labs(x = "Size (mm)", y = "Relative Frequency") +
+	theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
 	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
 	
-  args.list(list(grobs = pltList, top = paste(date_data$TAXON))
+  args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
   do.call(grid.arrange, args.list)
-}}}}}
-	
-else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
-  hab = levels(DATA$HABITAT)
-  
-  for(j in habitat){
-	  
-taxon = levels(DATA$TAXON)
 
-for(k in taxon){
-  data1 = PROP_TABLE[which(PROP_TABLE$SITE == i) & which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
-  dates = as.character(sort(unique(data1$JULIAN)))
-  pltList = list()
+   }
+   }
+   }
+     }
+
+else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
   
-  for(l in dates){
-    data2 = data1[which(data1$JULIAN == l),];
-    date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
-    v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
-    ymax = max(date_data$rel.freq) + 0.05
-    xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+  
+  for(j in hab){
     
-    pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
-      geom_bar(stat = "identity", width = 0.99) +
-      scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
-      scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
-      labs(x = "Size (mm)", y = "Relative Frequency") +
-      ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
-              
-              args.list(list(grobs = pltList, top = paste(date_data$TAXON))
-                        do.call(grid.arrange, args.list)
-  }}}}
+    taxon = levels(DATA$TAXON)
+    
+    for(k in taxon){
+      data1 = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
+      dates = as.character(sort(unique(data1$JULIAN)))
+      pltList = list()
+      
+      for(l in dates){
+        data2 = data1[which(data1$JULIAN == l),];
+        date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+        v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+        ymax = max(date_data$rel.freq) + 0.05
+        xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+        
+        pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
+          geom_bar(stat = "identity", width = 0.99) +
+          scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
+          scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+          theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+          ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+                  
+          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+          do.call(grid.arrange, args.list)
+      }
+    }
+  }
+}
+
+else if(!missing(site) & !missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
+  taxon = levels(DATA$TAXON)
+  
+  for(k in taxon){
+    data1 = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habitat) & which(PROP_TABLE$TAXON == k),]
+    dates = as.character(sort(unique(data1$JULIAN)))
+    pltList = list()
+    
+    for(l in dates){
+      data2 = data1[which(data1$JULIAN == l),];
+      date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+      v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+      ymax = max(date_data$rel.freq) + 0.05
+      xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+      
+      pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
+        geom_bar(stat = "identity", width = 0.99) +
+        scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
+        scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+        theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+        ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+                
+        args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+        do.call(grid.arrange, args.list)
+    }
+  }
+}
