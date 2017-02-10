@@ -38,6 +38,7 @@ library(pacman)
 package.list <- c("plyr", "dplyr", "tidyr", "reshape2", "ggplot2", "chron", "grid", "gridExtra")
 p_load(char = package.list, install = T)
 
+rm("package.list")
 
 ####
 
@@ -54,20 +55,18 @@ theme_set(theme_classic())
 
   #Insert the julian date variable into the dataframe:
   DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])])
+  
+  DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
+  DATA_COL <- DATA_SUM[,1:5]
+  DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
+  PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
+  
+  sites = levels(DATA$SITE)
+  hab = levels(DATA$HABITAT)
 
-#source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
+source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
 if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
 	
-	#DATA_SUM  <- ddply(DATA, c("SITE", "DATE", "HABITAT", "TAXON"), function(x) apply(x[,7:(dim(DATA)[2])], fun, na.rm = T))
-	#DATA_SUM  <- ddply(DATA, c("SITE", "DATE", "HABITAT", "TAXON"), colwise(mean, DATA[,7:(dim(DATA)[2])]))
-	DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
-	DATA_COL <- DATA_SUM[,1:5]
-	DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
-	PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
-
-sites = levels(DATA$SITE)
-hab = levels(DATA$HABITAT)
-
    for(i in sites){
    for(j in hab){
 
@@ -99,16 +98,18 @@ taxon = levels(DATA$TAXON)
    }
    }
      }
-
+      }
+  
 else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
   
-  
+data_site = PROP_TABLE[which(PROP_TABLE$site == site),]
+    
   for(j in hab){
     
     taxon = levels(DATA$TAXON)
     
     for(k in taxon){
-      data1 = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
+      data1 = PROP_TABLE[which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
       dates = as.character(sort(unique(data1$JULIAN)))
       pltList = list()
       
