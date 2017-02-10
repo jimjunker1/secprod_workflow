@@ -44,42 +44,34 @@ rm("package.list")
 
 len_freq <- function(DATA, site, TAXA, habitat, first.date, last.date, fun, ...){
 theme_set(theme_classic())
+# theme_set(theme_bw())  
 
-#Extract years, months, and days, and re-code them as numeric variables:
-  year <- as.numeric(as.character(years(chron(dates = as.character(DATA$DATE)))))
-  month <- as.numeric(months(chron(dates = as.character(DATA$DATE))))
-  day <- as.numeric(days(chron(dates = as.character(DATA$DATE))))
-
-  #Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
-  JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
-
-  #Insert the julian date variable into the dataframe:
-  DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])])
   
-  DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
+  DATA_SUM <- aggregate(DATA[c(names(DATA[6:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
   DATA_COL <- DATA_SUM[,1:5]
   DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
   PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
-  
+ 
+#source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
+if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
+
   sites = levels(DATA$SITE)
   hab = levels(DATA$HABITAT)
-
-source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
-if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
-	
+  taxon = levels(DATA$TAXON)  
+  	
    for(i in sites){
+     data_site = PROP_TABLE[which(PROP_TABLE$site == i),]
    for(j in hab){
-
-taxon = levels(DATA$TAXON)
-
+    data_hab = data_site[which(data_site$HABITAT == j),]
    for(k in taxon){
-	data1 = PROP_TABLE[which(PROP_TABLE$SITE == i) & which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
-	dates = as.character(sort(unique(data1$JULIAN)))
+  
+  data_tax = data_hab[which(data_hab$TAXON == k)]
+	dates = as.character(sort(unique(data_tax$JULIAN)))
 	pltList = list()
 
    for(l in dates){
-	data2 = data1[which(data1$JULIAN == l),];
-	date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+	data_loop = data_tax[which(data_tax$JULIAN == l),];
+	date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
 	v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
 	ymax = max(date_data$rel.freq) + 0.05
 	xmax = max(date_data$size[which(date_data$rel.freq != 0)])
@@ -89,33 +81,35 @@ taxon = levels(DATA$TAXON)
 	scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
 	scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
 	theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
 	
-  args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+  args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
+  pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
   do.call(grid.arrange, args.list)
+  dev.off()
+    }
+   }
+  }
+ }
+} else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
 
-   }
-   }
-   }
-     }
-      }
-  
-else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
-  
-data_site = PROP_TABLE[which(PROP_TABLE$site == site),]
-    
+ data_site = PROP_TABLE[which(PROP_TABLE$site == site),]
+ 
+ hab = levels(data_site$HABITAT)
+ taxon = levels(data_site$TAXON) 
+ 
   for(j in hab){
     
-    taxon = levels(DATA$TAXON)
+   data_hab = data_site[which(data_site$habitat == habitat)]
     
     for(k in taxon){
-      data1 = PROP_TABLE[which(PROP_TABLE$HABITAT == j) & which(PROP_TABLE$TAXON == k),]
-      dates = as.character(sort(unique(data1$JULIAN)))
+      data_tax = data_hab[which(data_hab$TAXON == k),]
+      dates = as.character(sort(unique(data_tax$JULIAN)))
       pltList = list()
       
       for(l in dates){
-        data2 = data1[which(data1$JULIAN == l),];
-        date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+        data_loop = data_tax[which(data_tax$JULIAN == l),];
+        date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
         v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
         ymax = max(date_data$rel.freq) + 0.05
         xmax = max(date_data$size[which(date_data$rel.freq != 0)])
@@ -125,26 +119,28 @@ data_site = PROP_TABLE[which(PROP_TABLE$site == site),]
           scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
           scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
           theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-          ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+          ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
                   
-          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
+          pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
           do.call(grid.arrange, args.list)
+          dev.off()
       }
     }
   }
-}
+ } else if(!missing(site) & !missing(habitat) & missing(TAXA) & missing(first.date) & missing(last.date)) {
 
-else if(!missing(site) & !missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)){
-  taxon = levels(DATA$TAXON)
-  
+data_site_hab = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita),]
+taxon = levels(data_site_hab$TAXON)  
+
   for(k in taxon){
-    data1 = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habitat) & which(PROP_TABLE$TAXON == k),]
-    dates = as.character(sort(unique(data1$JULIAN)))
+    data_tax = data_site_hab[which(PROP_TABLE$TAXON == k),]
+    dates = as.character(sort(unique(data_tax$JULIAN)))
     pltList = list()
     
     for(l in dates){
-      data2 = data1[which(data1$JULIAN == l),];
-      date_data = gather(data2, size, rel.freq, 6:(dim(data2)[2]));
+      data_loop = data_tax[which(data_tax$JULIAN == l),];
+      date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
       v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
       ymax = max(date_data$rel.freq) + 0.05
       xmax = max(date_data$size[which(date_data$rel.freq != 0)])
@@ -154,10 +150,38 @@ else if(!missing(site) & !missing(TAXA) & missing(habitat) & missing(first.date)
         scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
         scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
         theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-        ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l])))
+        ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
                 
-        args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+        args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
+        pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
         do.call(grid.arrange, args.list)
+        dev.off()
     }
+  }
+} else if(!missing(site) & !missing(habitat) & !missing(TAXA) & missing(first.date) & missing(last.date)){
+    
+  data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita) & which(PROP_TABLE$TAXON == TAXON),]
+  dates = as.character(sort(unique(data_sub$JULIAN)))
+      pltList = list()
+      
+      for(l in dates){
+        data_loop = data_site_hab_tax[which(data_site_hab_tax$JULIAN == l),];
+        date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
+        v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
+        ymax = max(date_data$rel.freq) + 0.05
+        xmax = max(date_data$size[which(date_data$rel.freq != 0)])
+        
+        pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
+          geom_bar(stat = "identity", width = 0.99) +
+          scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
+          scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+          theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+          ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
+                  
+          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
+          pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
+          do.call(grid.arrange, args.list)
+          dev.off()
+   }
   }
 }

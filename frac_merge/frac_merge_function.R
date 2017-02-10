@@ -39,6 +39,7 @@ if(!require("pacman")) install.packages("pacman")
 library(pacman)
 package.list <- c( "plyr", "dplyr", "tidyr", "reshape2", "chron")
 p_load(char = package.list, install = T)
+rm(package.list)
 ##
 frac_merge <- function(DATA, file.name,...) {
 	stm <- proc.time()
