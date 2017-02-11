@@ -36,7 +36,7 @@ ins_julian <- function(DATA, file.name,...) {
   ##Required packages 'chron'
   if(!require("pacman")) install.packages("pacman")
   library(pacman)
-  package.list <- c("RCurl", "plyr", "dplyr", "tidyr", "reshape2", "ggplot2", "chron", "grid", "gridExtra")
+  package.list <- c("chron")
   p_load(char = package.list, install = T)
   rm("package.list")
 
@@ -51,7 +51,7 @@ JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
 #Insert the julian date variable into the dataframe:
 DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])])
 
-sink(paste(file.name,"_julian.txt", sep = ""))
-print(DATA)
-sink()
+#sink(paste(file.name,"_julian.txt", sep = ""))
+write.table(DATA, file = paste(file.name,"_julian.txt"), sep ="\t", row.names = F)
+#sink()
 }

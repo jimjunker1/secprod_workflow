@@ -65,9 +65,9 @@ frac_merge <- function(DATA, file.name,...) {
 	DATA_LONG.area <- ddply(DATA_LONG.sub, c("SITE", "SAMPLE", "DATE", "HABITAT", "TAXON", "size_class"), transform, count = count/AREA_COR)				#Applies areal correction for each sample
 	DATA_LONG.sum <- ddply(DATA_LONG.area, c("SITE", "SAMPLE", "DATE", "HABITAT", "TAXON", "size_class"), summarize, count_fin = sum(count))	#Sums fractions for each size class to get to density
 	DATA_FIN <- spread(DATA_LONG.sum, size_class, count_fin)
-	sink(paste(file.name,"_merged.txt", sep = ""))
-	print(DATA_FIN)
-	sink()
+	#sink(paste(file.name,"_merged.txt", sep = ""))
+	write.table(DATA_FIN, file = paste(file.name,"_merged.txt"), sep = "")
+	#sink()
 	total.time <- proc.time() - stm
 	print(paste("Total run time = ", total.time[[1]]))
 }
