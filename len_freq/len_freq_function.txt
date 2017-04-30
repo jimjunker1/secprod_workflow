@@ -44,53 +44,10 @@ rm("package.list")
 
 len_freq <- function(DATA, site, TAXA, habitat, first.date, last.date, fun, ...){
 theme_set(theme_classic())
-#  theme_bw <- function(base_size = 20) {
-#    structure(list(
-#      axis.line =         element_blank(),
-#      axis.text.x =       element_text(size = base_size * 0.8 , lineheight = 0.9, vjust = 1),
-#      axis.text.y =       element_text(size = base_size * 0.8, lineheight = 0.9, hjust = 1),
-#      axis.ticks =        element_segment(colour = "black", size = 0.2),
-#      axis.title.x =      element_text(size = base_size, vjust = 1),
-#      axis.title.y =      element_text(size = base_size, angle = 90, vjust = 0.5),
-#      axis.ticks.length = unit(0.3, "lines"),
-#      axis.ticks.margin = unit(0.5, "lines"),
-#      
-#      legend.background = element_rect(colour=NA), 
-#      legend.key =        element_rect(colour = "grey80"),
-#      legend.key.size =   unit(1.2, "lines"),
-#      legend.text =       element_text(size = base_size * 0.8),
-#      legend.title =      element_text(size = base_size * 0.8, face = "bold", hjust = 0),
-#      legend.position =   "right",
-#      
-#      panel.background =  element_rect(fill = "white", colour = NA), 
-#      panel.border =      element_rect(fill = NA, colour="grey50"), 
-#      panel.grid.major =  element_blank(),
-#      panel.grid.minor =  element_blank(),
-#      panel.margin =      unit(0.25, "lines"),
-#
-#      strip.background =  element_rect(fill = "grey80", colour = "grey50"), 
-#      strip.text.x =      element_text(size = base_size * 0.8),
-#      strip.text.y =      element_text(size = base_size * 0.8, angle = -90),
-#      
-#      plot.background =   element_rect(colour = NA),
-#      plot.title =        element_text(size = base_size * 1.2),
-#      plot.margin =       unit(c(1, 1, 0.5, 0.5), "lines")
-#    ), class = "options")
-#  }
 # theme_set(theme_bw())  
 
-#Extract years, months, and days, and re-code them as numeric variables:
-  year <- as.numeric(as.character(years(chron(dates = as.character(DATA$DATE)))))
-  month <- as.numeric(months(chron(dates = as.character(DATA$DATE))))
-  day <- as.numeric(days(chron(dates = as.character(DATA$DATE))))
-
-  #Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
-  JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
-
-  #Insert the julian date variable into the dataframe:
-  DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])])
   
-  DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
+  DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = sum)
   DATA_COL <- DATA_SUM[,1:5]
   DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
   PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
@@ -203,7 +160,7 @@ taxon = levels(data_site_hab$TAXON)
   }
 } else if(!missing(site) & !missing(habitat) & !missing(TAXA) & missing(first.date) & missing(last.date)){
     
-  data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita) & which(PROP_TABLE$TAXON == TAXON),]
+  data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita) & which(PROP_TABLE$TAXON == TAXA),]
   dates = as.character(sort(unique(data_sub$JULIAN)))
       pltList = list()
       

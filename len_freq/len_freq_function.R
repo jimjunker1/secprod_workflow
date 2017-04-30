@@ -44,10 +44,10 @@ rm("package.list")
 
 len_freq <- function(DATA, site, TAXA, habitat, first.date, last.date, fun, ...){
 theme_set(theme_classic())
-# theme_set(theme_bw())  
 
+graphics.off() 
   
-  DATA_SUM <- aggregate(DATA[c(names(DATA[6:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
+  DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
   DATA_COL <- DATA_SUM[,1:5]
   DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
   PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
@@ -60,12 +60,12 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
   taxon = levels(DATA$TAXON)  
   	
    for(i in sites){
-     data_site = PROP_TABLE[which(PROP_TABLE$site == i),]
+     data_site = PROP_TABLE[which(PROP_TABLE$SITE == i),]
    for(j in hab){
     data_hab = data_site[which(data_site$HABITAT == j),]
    for(k in taxon){
   
-  data_tax = data_hab[which(data_hab$TAXON == k)]
+  data_tax = data_hab[which(data_hab$TAXON == k),]
 	dates = as.character(sort(unique(data_tax$JULIAN)))
 	pltList = list()
 
@@ -80,27 +80,28 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
 	geom_bar(stat = "identity", width = 0.99) +
 	scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
 	scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+	geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
 	theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
 	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
 	
-  args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
-  pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
+  args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+  pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
   do.call(grid.arrange, args.list)
   dev.off()
     }
    }
   }
  }
-} else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
-
- data_site = PROP_TABLE[which(PROP_TABLE$site == site),]
+} #else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
+  else if(!missing(site)) {
+ data_site = PROP_TABLE[which(PROP_TABLE$SITE == site),]
  
  hab = levels(data_site$HABITAT)
  taxon = levels(data_site$TAXON) 
  
   for(j in hab){
     
-   data_hab = data_site[which(data_site$habitat == habitat)]
+   data_hab = data_site[which(data_site$HABITAT == habitat)]
     
     for(k in taxon){
       data_tax = data_hab[which(data_hab$TAXON == k),]
@@ -118,19 +119,21 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
           geom_bar(stat = "identity", width = 0.99) +
           scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
           scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+          geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
           theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
           ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
                   
-          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
-          pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
+          args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+          pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
           do.call(grid.arrange, args.list)
           dev.off()
       }
     }
   }
- } else if(!missing(site) & !missing(habitat) & missing(TAXA) & missing(first.date) & missing(last.date)) {
+ } #else if(!missing(site) & !missing(habitat) & missing(TAXA) & missing(first.date) & missing(last.date)) {
+else if(!missing(site) & !missing(habitat)) {
 
-data_site_hab = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita),]
+data_site_hab = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habitat),]
 taxon = levels(data_site_hab$TAXON)  
 
   for(k in taxon){
@@ -149,18 +152,20 @@ taxon = levels(data_site_hab$TAXON)
         geom_bar(stat = "identity", width = 0.99) +
         scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
         scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+        geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
         theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
         ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
                 
-        args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
-        pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
+        args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+        pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
         do.call(grid.arrange, args.list)
         dev.off()
     }
   }
-} else if(!missing(site) & !missing(habitat) & !missing(TAXA) & missing(first.date) & missing(last.date)){
-    
-  data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$site == site) & which(PROP_TABLE$habitat == habtita) & which(PROP_TABLE$TAXON == TAXON),]
+} #else if(!missing(site) & !missing(habitat) & !missing(TAXA) & missing(first.date) & missing(last.date)){
+else if(!missing(site) & !missing(habitat) & !missing(TAXA)){
+  
+  data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habtita) & which(PROP_TABLE$TAXON == TAXA),]
   dates = as.character(sort(unique(data_sub$JULIAN)))
       pltList = list()
       
@@ -175,11 +180,12 @@ taxon = levels(data_site_hab$TAXON)
           geom_bar(stat = "identity", width = 0.99) +
           scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
           scale_x_continuous(limits = c(0, as.numeric(xmax) + 1), expand = c(0,0)) +
+          geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
           theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
           ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
                   
-          args.list(list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)"))
-          pdf(file = paste(data$SITE,"_",data$TAXON,"_plot.pdf"))
+          args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
+          pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
           do.call(grid.arrange, args.list)
           dev.off()
    }
