@@ -33,45 +33,34 @@ if(!require("pacman")) install.packages("pacman")
 library(pacman)
 package.list <- c("plyr", "dplyr", "tidyr", "reshape2", "ggplot2", "chron", "grid", "gridExtra")
 p_load(char = package.list, install = T)
-
 rm("package.list")
-
 ####
-
 len_freq <- function(DATA, site, TAXA, habitat, first.date, last.date, fun, ...){
 theme_set(theme_classic())
-
 graphics.off() 
-  
   DATA_SUM <- aggregate(DATA[c(names(DATA[7:(dim(DATA)[2])]))], by = DATA[c("SITE", "DATE", "JULIAN", "HABITAT", "TAXON")], FUN = fun)
   DATA_COL <- DATA_SUM[,1:5]
   DATA_PROP <- t(apply(DATA_SUM[6:(dim(DATA_SUM)[2])],1, prop.table))
   PROP_TABLE <- data.frame(DATA_COL, DATA_PROP, check.names = F)
- 
 #source("C:/Users/Jim/Documents/Projects/Iceland/Bug Samples/Secondary Production/Secondary Production R code suite/len_freq/len_freq_plot.txt")
 if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
-
   sites = levels(DATA$SITE)
   hab = levels(DATA$HABITAT)
   taxon = levels(DATA$TAXON)  
-  	
    for(i in sites){
      data_site = PROP_TABLE[which(PROP_TABLE$SITE == i),]
    for(j in hab){
     data_hab = data_site[which(data_site$HABITAT == j),]
    for(k in taxon){
-  
   data_tax = data_hab[which(data_hab$TAXON == k),]
 	dates = as.character(sort(unique(data_tax$JULIAN)))
 	pltList = list()
-
    for(l in dates){
 	data_loop = data_tax[which(data_tax$JULIAN == l),];
 	date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
 	v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
 	ymax = max(date_data$rel.freq) + 0.05
 	xmax = max(date_data$size[which(date_data$rel.freq != 0)])
-
 	pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
 	geom_bar(stat = "identity", width = 0.99) +
 	scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
@@ -79,7 +68,6 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
 	geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
 	theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
 	ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
-	
   args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
   pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
   do.call(grid.arrange, args.list)
@@ -91,26 +79,20 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
 } #else if(!missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & missing(last.date)) {
   else if(!missing(site)) {
  data_site = PROP_TABLE[which(PROP_TABLE$SITE == site),]
- 
  hab = levels(data_site$HABITAT)
  taxon = levels(data_site$TAXON) 
- 
   for(j in hab){
-    
    data_hab = data_site[which(data_site$HABITAT == habitat)]
-    
     for(k in taxon){
       data_tax = data_hab[which(data_hab$TAXON == k),]
       dates = as.character(sort(unique(data_tax$JULIAN)))
       pltList = list()
-      
       for(l in dates){
         data_loop = data_tax[which(data_tax$JULIAN == l),];
         date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
         v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
         ymax = max(date_data$rel.freq) + 0.05
         xmax = max(date_data$size[which(date_data$rel.freq != 0)])
-        
         pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
           geom_bar(stat = "identity", width = 0.99) +
           scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
@@ -118,7 +100,6 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
           geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
           theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
           ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
-                  
           args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
           pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
           do.call(grid.arrange, args.list)
@@ -128,22 +109,18 @@ if(missing(site) & missing(TAXA) & missing(habitat) & missing(first.date) & miss
   }
  } #else if(!missing(site) & !missing(habitat) & missing(TAXA) & missing(first.date) & missing(last.date)) {
 else if(!missing(site) & !missing(habitat)) {
-
 data_site_hab = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habitat),]
 taxon = levels(data_site_hab$TAXON)  
-
   for(k in taxon){
     data_tax = data_site_hab[which(PROP_TABLE$TAXON == k),]
     dates = as.character(sort(unique(data_tax$JULIAN)))
     pltList = list()
-    
     for(l in dates){
       data_loop = data_tax[which(data_tax$JULIAN == l),];
       date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
       v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
       ymax = max(date_data$rel.freq) + 0.05
       xmax = max(date_data$size[which(date_data$rel.freq != 0)])
-      
       pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
         geom_bar(stat = "identity", width = 0.99) +
         scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
@@ -151,7 +128,6 @@ taxon = levels(data_site_hab$TAXON)
         geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
         theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
         ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
-                
         args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
         pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
         do.call(grid.arrange, args.list)
@@ -160,18 +136,15 @@ taxon = levels(data_site_hab$TAXON)
   }
 } #else if(!missing(site) & !missing(habitat) & !missing(TAXA) & missing(first.date) & missing(last.date)){
 else if(!missing(site) & !missing(habitat) & !missing(TAXA)){
-  
   data_site_hab_tax = PROP_TABLE[which(PROP_TABLE$SITE == site) & which(PROP_TABLE$HABITAT == habtita) & which(PROP_TABLE$TAXON == TAXA),]
   dates = as.character(sort(unique(data_sub$JULIAN)))
       pltList = list()
-      
       for(l in dates){
         data_loop = data_site_hab_tax[which(data_site_hab_tax$JULIAN == l),];
         date_data = gather(data_loop, size, rel.freq, 6:(dim(data_loop)[2]));
         v = date_data$size[which(date_data$rel.freq == max(date_data$rel.freq))]
         ymax = max(date_data$rel.freq) + 0.05
         xmax = max(date_data$size[which(date_data$rel.freq != 0)])
-        
         pltList[[l]] <- ggplot(date_data, aes( x = as.numeric(size), y = rel.freq)) +
           geom_bar(stat = "identity", width = 0.99) +
           scale_y_continuous(limits = c(0, as.numeric(ymax)), expand = c(0,0)) +
@@ -179,11 +152,35 @@ else if(!missing(site) & !missing(habitat) & !missing(TAXA)){
           geom_vline(xintercept = as.numeric(v), colour = "red", size = 1, linetype = "dashed") +
           theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
           ggtitle(paste(as.character(date_data$DATE[which(date_data$JULIAN == l)])))
-                  
           args.list = list(grobs = pltList, top = paste(date_data$TAXON), left = "Relative Frequency", bottom = "Size (mm)")
           pdf(file = paste(data_tax$SITE,"_",data_tax$TAXON,"_plot.pdf"))
           do.call(grid.arrange, args.list)
           dev.off()
+
    }
   }
 }
+# ## plotting the distribution of a few dates ###
+# #https://www.data-to-viz.com/graph/ridgeline.html#mistake
+# # use the ridgeplot to view these data next.
+# x[[5]][[1]] %>%
+#   #mutate(text = fct_reorder(text, value)) %>%
+#   ggplot( aes(y=start_date, x=IGR,  fill=start_date)) +
+#   geom_density_ridges(alpha=0.8, bandwidth=0.004) +
+#   #geom_density_ridges(alpha = 0.8, stat = "binline", bins = 20) +
+#   scale_fill_viridis(discrete=TRUE) +
+#   scale_color_viridis(discrete=TRUE) +
+#   #theme_ipsum() +
+#   theme(
+#     panel.grid = element_blank(),
+#     legend.position="none",
+#     panel.spacing = unit(0.1, "lines"),
+#     strip.text.x = element_text(size = 8)
+#   ) +
+#   xlab("") +
+#   ylab("IGR d-1")
+# 
+# 
+# ggplot(x[[5]][[1]], aes(x = IGR)) + geom_histogram() + facet_wrap(~start_date)
+# length(which(x[[5]][[1]] ==0.0010))
+# x[[5]][[1]]
