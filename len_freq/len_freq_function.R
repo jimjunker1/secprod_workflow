@@ -4,9 +4,7 @@
 ##Purpose: This code automates the plotting of length-frequency histograms of specified site, habitat, and taxon for a specified date range.
 ##	This function is meant to be used with a matrix of invertebrate size-classes(mm) and abundance (m^-2). There are five preceeding columns
 ##	SITE, SAMPLE, DATE, HABITAT, TAXON.
-
 ##	Date should maintain the following form with exact headings on columns 1-5
-
 ###	SITE	SAMPLE	DATE		HABITAT	TAXON		0.25	0.5	1	1.5
 #	HVER	2		08/02/2011	COBBLE	OSTRACOD	0	0	2	2
 #	HVER	2		08/02/2011	COBBLE	MIDGE		0	0	10	7
@@ -16,7 +14,6 @@
 #	.
 #	.
 #	.
-
 ## Notes:
 ##	SITE can handle an unlimited number of sites
 ##	SAMPLE number is detected and can handle unequal sample numbers across site/date/habitat/etc.
@@ -31,7 +28,6 @@
 ##	When loading in the data file be sure to turn name checking off otherwise  
 ##	(i.e. DATA <- read.table(C:\DATA.txt, header = T, sep = "\t", quote = "", strip.white = T, row.names = F, check.names = F))
 ## 
-
 ##Required packages 'plyr', 'dplyr', 'tidyr', 'reshape2', 'ggplot2', 'chron', 'grid', 'gridExtra'
 if(!require("pacman")) install.packages("pacman")
 library(pacman)
