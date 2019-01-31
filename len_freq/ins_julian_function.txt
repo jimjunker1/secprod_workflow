@@ -41,9 +41,9 @@ ins_julian <- function(DATA, file.name,...) {
   rm("package.list")
 
 #Extract years, months, and days, and re-code them as numeric variables:
-year <- as.numeric(as.character(years(chron(dates = as.character(DATA$DATE)))))
-month <- as.numeric(months(chron(dates = as.character(DATA$DATE))))
-day <- as.numeric(days(chron(dates = as.character(DATA$DATE))))
+year <- as.numeric(as.character(year(chron(dates = as.character(DATA$DATE)))))
+month <- as.numeric(month(chron(dates = as.character(DATA$DATE))))
+day <- as.numeric(day(chron(dates = as.character(DATA$DATE))))
 
 #Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
 JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
