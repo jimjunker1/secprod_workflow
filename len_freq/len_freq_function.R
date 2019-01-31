@@ -29,8 +29,7 @@
 ##	(i.e. DATA <- read.table(C:\DATA.txt, header = T, sep = "\t", quote = "", strip.white = T, row.names = F, check.names = F))
 ## 
 ##Required packages 'plyr', 'dplyr', 'tidyr', 'reshape2', 'ggplot2', 'chron', 'grid', 'gridExtra'
-if(!require("pacman")) install.packages("pacman")
-library(pacman)
+if(!require("pacman")) install.packages("pacman");library(pacman)
 package.list <- c("plyr", "dplyr", "tidyr", "reshape2", "ggplot2", "chron", "grid", "gridExtra")
 p_load(char = package.list, install = T)
 rm("package.list")
