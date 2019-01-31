@@ -1,5 +1,5 @@
 ## INS_JULIAN, converting and inserting JULIAN dates, Author: Jim Junker
-## Last Updated: Sept. 2016
+## Last Updated: Jan. 2019
 ##
 ##Purpose: This code automates the plotting of length-frequency histograms of specified site, habitat, and taxon for a specified date range.
 ##	This function is meant to be used with a matrix of invertebrate size-classes(mm) and abundance (m^-2). There are five preceeding columns
@@ -50,6 +50,6 @@ JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
 
 #Insert the julian date variable into the dataframe:
 DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])], check.names = F)
-
-write.table(DATA, file = paste(file.name,"_julian.txt", sep = ""), sep ="\t", quote = F, append = F, row.names = F)
+return(DATA)
+#write.table(DATA, file = paste0(file.name,".txt"), sep ="\t", quote = F, append = F, row.names = F)
 }
