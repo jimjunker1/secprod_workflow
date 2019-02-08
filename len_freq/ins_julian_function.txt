@@ -46,7 +46,7 @@ month <- as.numeric(month(chron(dates = as.character(DATA$DATE))))
 day <- as.numeric(day(chron(dates = as.character(DATA$DATE))))
 
 #Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
-JULIAN <- julian(month, day, year, origin=c(month = 12, day = 31, year = 2010))
+JULIAN <- julian(month, day, year, origin=c(month = 01, day = 01, year = 2010))
 
 #Insert the julian date variable into the dataframe:
 DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])], check.names = F)
