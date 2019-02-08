@@ -41,12 +41,12 @@ ins_julian <- function(DATA, file.name,...) {
   rm("package.list")
 
 #Extract years, months, and days, and re-code them as numeric variables:
-year <- as.numeric(as.character(year(chron(dates = as.character(DATA$DATE)))))
-month <- as.numeric(month(chron(dates = as.character(DATA$DATE))))
-day <- as.numeric(day(chron(dates = as.character(DATA$DATE))))
+#year <- as.numeric(as.character(year(chron(dates = as.character(DATA$DATE)))))
+#month <- as.numeric(month(chron(dates = as.character(DATA$DATE))))
+#day <- as.numeric(day(chron(dates = as.character(DATA$DATE))))
 
-#Combine year, month, and day into a single julian date variable starting with January 1, 2006 (i.e.- Jan 1, 2006 = day1):
-JULIAN <- julian(month, day, year, origin=c(month = 01, day = 01, year = 2010))
+#Combine year, month, and day into a single julian date variable starting with January 1, 2010 (i.e.- Jan 1, 2010 = day1):
+JULIAN <- julian(DATA$DATE, origin="01/01/10")
 
 #Insert the julian date variable into the dataframe:
 DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])], check.names = F)
