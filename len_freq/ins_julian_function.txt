@@ -46,7 +46,8 @@ ins_julian <- function(DATA, file.name,...) {
 #day <- as.numeric(day(chron(dates = as.character(DATA$DATE))))
 
 #Combine year, month, and day into a single julian date variable starting with January 1, 2010 (i.e.- Jan 1, 2010 = day1):
-JULIAN <- julian(DATA$DATE, origin="01/01/10")
+DATA$DATE <- as.POSIXct(DATA$DATE, format = "%m/%d/%y")
+JULIAN = julian(DATA$DATE, origin="2010-01-01")
 
 #Insert the julian date variable into the dataframe:
 DATA <- data.frame(DATA[,1:2], JULIAN, DATA[,3:(dim(DATA)[2])], check.names = F)
